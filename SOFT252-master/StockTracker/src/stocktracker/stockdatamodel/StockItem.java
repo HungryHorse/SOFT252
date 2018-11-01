@@ -5,17 +5,68 @@
  */
 package stocktracker.stockdatamodel;
 
+import java.util.ArrayList;
+import utilities.IObserver;
 /**
  *
  * @author jjbrewer
  */
-public class StockItem {
+public abstract class StockItem {
+    
+    public StockItem()
+    {
+    }
+    
+    public StockItem(String name)
+    {
+        this.name = name;
+    }
+    
+    public StockItem(String name, Integer qty)
+    {
+        this.name = name;
+        this.quantityInStock = qty;
+    }
+    
+    public Boolean registerObserver(IObserver o)
+    {
+        Boolean blnAdded = false;
+        if(o != null){
+            
+            if(this.observers == null){
+                this.observers = new ArrayList<>();
+            }
+            
+            blnAdded = this.observers.add(o);
+        }
+        
+        return blnAdded;
+    }
+    public Boolean removeObserver(IObserver o)
+    {
+        Boolean blnRemoved = false;
+        if(o != null){
+            if(this.observers != null){
+                blnRemoved = this.observers.remove(o);
+            }
+        }
+        
+        return blnRemoved;
+    }
+    public void notifyObservers()
+    {
+        if(this.observers != null && this.observers.size() > 0){
+            for (IObserver currentObserver : this.observers){
+                currentObserver.update();
+            }
+        }
+    }
     
     protected String name = "UNKOWN";
     protected Integer quantityInStock = 0;
     protected Double sellingPrice = 1000000.00;
     protected Double costPrice = 1000000.00;
-    
+    private ArrayList<IObserver> observers = null;
     
     public Double getCostPrice() {
         return costPrice;
@@ -25,6 +76,7 @@ public class StockItem {
         if(costPrice != null && costPrice >= 0){
             this.costPrice = costPrice;
         }
+        notifyObservers();
     }
 
     public String getName() {
@@ -35,6 +87,7 @@ public class StockItem {
         if(name != null && !name.isEmpty()){
             this.name = name;
         }
+        notifyObservers();
     }
 
     public Integer getQuantityInStock() {
@@ -45,6 +98,7 @@ public class StockItem {
         if(quantityInStock != null && quantityInStock >= 0){
             this.quantityInStock = quantityInStock;
         }
+        notifyObservers();
     }
 
     public Double getSellingPrice() {
@@ -55,6 +109,7 @@ public class StockItem {
         if(sellingPrice != null && sellingPrice >= this.costPrice && sellingPrice >= 0){
             this.sellingPrice = sellingPrice;
         }
+        notifyObservers();
     }
     
     public Boolean isInStock(){
@@ -66,6 +121,7 @@ public class StockItem {
     }
 
     
+    public abstract StockType getItemType();
     
     
 }
